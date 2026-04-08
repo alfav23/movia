@@ -47,7 +47,7 @@ export default function Page() {
 
       {results && (
         <div className="p-4 rounded">
-          {JSON.stringify(results.choices[0].message.content, null, 4)}
+          {results.choices[0].message.content}
         </div>
         
       )}

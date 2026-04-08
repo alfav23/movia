@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-//     messages.push(response);
+// messages.push(response);
 
 // for (const toolCall of response.tool_calls) {
 //   const toolName = toolCall.function.name;
