@@ -6,6 +6,18 @@ interface Movie {
   year: string;
 }
 
+async function searchIMDb(searchTerms: string[]): Promise<Movie[]> {
+  const searchQuery = searchTerms.join(' ');
+  const url = 'https://www.imdb.com';
+  const response = await fetch(`${url}?search=${searchQuery}`);
+  const data = await response.json();
+  return data.results.map((movie: any) => ({
+    id: movie.id,
+    title: movie.title,
+    year: movie.year,
+  }));
+}
+
 const tools = [
   { "type": "openrouter:web_search", "parameters": { "max_results": 3 } },
   {
@@ -30,17 +42,9 @@ const tools = [
   },
 ];
 
-async function searchIMDb(searchTerms: string[]): Promise<Movie[]> {
-  const searchQuery = searchTerms.join(' ');
-  const url = 'https://www.imdb.com';
-  const response = await fetch(`${url}?search=${searchQuery}`);
-  const data = await response.json();
-  return data.results.map((movie: any) => ({
-    id: movie.id,
-    title: movie.title,
-    year: movie.year,
-  }));
-}
+const TOOL_MAPPING = {
+  searchIMDb,
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,7 +76,8 @@ export async function POST(request: NextRequest) {
     const payload = {
       "model": "openai/gpt-oss-120b:free@preset/movie-suggester",
       messages,
-      tools
+      tools,
+      stream: false,
     };
 
     const response = await fetch(url, {
@@ -80,6 +85,20 @@ export async function POST(request: NextRequest) {
       headers,
       body: JSON.stringify(payload)
     });
+
+//     messages.push(response);
+
+// for (const toolCall of response.tool_calls) {
+//   const toolName = toolCall.function.name;
+//   const { search_params } = JSON.parse(toolCall.function.arguments);
+//   const toolResponse = await TOOL_MAPPING[searchIMDb](search_params);
+//   messages.push({
+//     role: 'tool',
+//     toolCallId: toolCall.id,
+//     name: toolName,
+//     content: JSON.stringify(toolResponse),
+//   });
+// }
 
     const data = await response.json();
     
@@ -92,3 +111,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
