@@ -23,7 +23,8 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
           id="input"
           className="input border border-white rounded-sm" 
           type="text"
-          placeholder=""
+          pattern="\w+"
+          placeholder="Enter only one word."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           disabled={isLoading}
