@@ -10,6 +10,10 @@ interface FormProps {
 export default function Form({ onSubmit, isLoading = false }: FormProps) {
   const [query, setQuery] = useState<string>("");
 
+  const prompts = ["What's your favorite color?", "What's your mood?", "What's the weather?", "How old are you?", "Dream job?", "Favorite city?"];
+
+  let prompt = Math.floor(Math.random()*(prompts.length)) + 1;
+
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     await onSubmit(query);
@@ -18,7 +22,7 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
   return (
     <>
       <form className="form" onSubmit={handleSubmit}>
-        <label htmlFor="input">Pick a color. </label>
+        <label htmlFor="input">{prompts[prompt]}</label>
         <input 
           id="input"
           className="input border border-white rounded-sm" 

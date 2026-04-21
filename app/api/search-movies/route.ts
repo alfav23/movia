@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface Movie {
-  id: number;
-  title: string;
-  year: string;
+export type Movie = {
+  id: number
+  poster_path: string
+  title: string
+  year: string
+  synopsis: string
 }
 
 type Message = {
@@ -23,10 +25,12 @@ async function searchIMDb(searchTerms: string[]): Promise<Movie[]> {
     headers 
   });
   const data = await response.json();
-  return data.results.map((movie: any) => ({
+  return data.results.map((movie: Movie) => ({
     id: movie.id,
+    poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
     title: movie.title,
     year: movie.year,
+    synopsis: movie.synopsis
   }));
 }
 
@@ -75,10 +79,6 @@ export async function POST(request: NextRequest) {
 
     const messages: Message[] = [
       {
-        "role": "system",
-        "content": "You are an AI assistant. You suggest movies to users based on one-word key words. Your output should only provide movie title, year of release, and a short synopsis."
-      },
-      {
         "role": "user",
         "content": `${query}`
       }
@@ -92,6 +92,10 @@ export async function POST(request: NextRequest) {
         "schema": {
           "type": "object",
           "properties": {
+            "poster": {
+              "type": "string",
+              "description": "Movie poster"
+            },
             "title": {
               "type": "string",
               "description": "Movie name"
@@ -118,13 +122,16 @@ export async function POST(request: NextRequest) {
       "Content-Type": "application/json"
     };
     const payload = {
-      "model": "openai/gpt-oss-20b:free@preset/movie-suggester",
+      "model": "nvidia/nemotron-3-super-120b-a12b:free@preset/movie-suggester",
       messages,
-      responseFormat,
+      response_format: responseFormat,
       plugins: [
         { id: 'response-healing' }
       ],
       tools,
+      provider: {
+        require_parameters: true,
+      },
       stream: false,
     };
 
@@ -157,9 +164,12 @@ export async function POST(request: NextRequest) {
 
       // Make a follow-up request with the tool results
       const followUpPayload = {
-        model: "openai/gpt-oss-20b:free@preset/movie-suggester",
+        model: "nvidia/nemotron-3-super-120b-a12b:free@preset/movie-suggester",
         messages,
         responseFormat,
+        provider: {
+          require_parameters: true,
+        },
         stream: false,
       };
 
@@ -170,11 +180,13 @@ export async function POST(request: NextRequest) {
       });
 
       const followUpData = await followUpResponse.json();
-      return NextResponse.json(followUpData);
+      const movieContent = JSON.parse(followUpData.choices[0].message.content);
+      return NextResponse.json({ results: [movieContent.movie] });
     }
 
     // If no tools were called, return the initial response
-    return NextResponse.json(data);
+    const movieContent = JSON.parse(data.choices[0].message.content);
+    return NextResponse.json({ results: [movieContent.movie] });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(
