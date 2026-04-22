@@ -14,7 +14,7 @@ type Message = {
   tool_call_id?: string;  // Optional for tool messages
 };
 
-async function searchIMDb(searchTerms: string[]): Promise<Movie[]> {
+async function searchTMDB(searchTerms: string[]): Promise<Movie[]> {
   const searchQuery = searchTerms.join(' ');
   const url = 'https://api.themoviedb.org/3/search/movie';
   const headers = {
@@ -24,7 +24,12 @@ async function searchIMDb(searchTerms: string[]): Promise<Movie[]> {
   const response = await fetch(`${url}?query=${searchQuery}`, { 
     headers 
   });
+  if (!response.ok) {
+    console.error(response.body);
+    return [];
+  }
   const data = await response.json();
+  //check for results error
   return data.results.map((movie: Movie) => ({
     id: movie.id,
     poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
@@ -40,8 +45,8 @@ const tools = [
     type: 'function',
     function: {
       id: 0,
-      name: 'searchIMDb',
-      description: 'Search for movies on IMDb',
+      name: 'searchTMDB',
+      description: 'Search for movies on TMDB using relevant terms and keywords',
       strict: null,
       parameters: {
         type: 'object',
@@ -51,7 +56,7 @@ const tools = [
             items: {
               type: 'string',
             },
-            description: "List of search terms to find movies in IMDb",
+            description: "List of search terms to find movies in TMDB",
           },
         },
         required: ['search_terms'],
@@ -61,7 +66,7 @@ const tools = [
 ];
 
 const TOOL_MAPPING = {
-  searchIMDb,
+  searchTMDB,
 };
 
 
@@ -90,27 +95,34 @@ export async function POST(request: NextRequest) {
         "name": "movies",
         "strict": true,
         "schema": {
-          "type": "object",
-          "properties": {
-            "poster": {
-              "type": "string",
-              "description": "Movie poster"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "TMDB movie id"
+              },
+              "poster_path": {
+                "type": "string",
+                "description": "TMDB movie poster URL"
+              },
+              "title": {
+                "type": "string",
+                "description": "Movie name"
+              },
+              "year": {
+                "type": "string",
+                "description": "Movie release year"
+              },
+              "synopsis": {
+                "type": "string",
+                "description": "A short summary of the movie"
+              }
             },
-            "title": {
-              "type": "string",
-              "description": "Movie name"
-            },
-            "year": {
-              "type": "string",
-              "description": "Movie release date"
-            },
-            "synopsis": {
-              "type": "string",
-              "description": "A short summary"
-            }
-          },
-          "required": ["title", "year", "synopsis"],
-          "additionalProperties": false
+            "required": ["id", "poster_path", "title", "year", "synopsis"],
+            "additionalProperties": false
+          }
         }
       }
     }
@@ -166,7 +178,7 @@ export async function POST(request: NextRequest) {
       const followUpPayload = {
         model: "nvidia/nemotron-3-super-120b-a12b:free@preset/movie-suggester",
         messages,
-        responseFormat,
+        response_format: responseFormat,
         provider: {
           require_parameters: true,
         },
@@ -180,13 +192,14 @@ export async function POST(request: NextRequest) {
       });
 
       const followUpData = await followUpResponse.json();
+      console.log(followUpData.choices[0].message.content);
       const movieContent = JSON.parse(followUpData.choices[0].message.content);
-      return NextResponse.json({ results: [movieContent.movie] });
+      return NextResponse.json({ results: [movieContent] });
     }
 
     // If no tools were called, return the initial response
     const movieContent = JSON.parse(data.choices[0].message.content);
-    return NextResponse.json({ results: [movieContent.movie] });
+    return NextResponse.json({ results: [movieContent] });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(

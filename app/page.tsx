@@ -35,7 +35,7 @@ export default function Page() {
         setError(data.error.message)
         return
       }
-      setResults(data);
+      setResults(data.results[0]);
       const processor = unified()
         .use(remarkParse)
         .use(remarkRehype, {allowDangerousHtml: true})
@@ -65,23 +65,21 @@ export default function Page() {
           Error: {error}
         </div>
       )}
-
-      {console.log(error)}
       
 
       {results && (
         //markdown library component around div, add movie poster results
         <div className="p-4 rounded movies">
+          {console.log(results)}
          { results.map((movie: Movie) => (
-            <div key={results.choices[0].message.content.movie.id} className="movie">
-              <img src={movie.poster_path} alt={`poster for ${results.choices[0].message.content.movie.title}`} />
+            <div key={movie.id} className="movie">
+              <img src={movie.poster_path} alt={`poster for ${movie.title}`} />
               <h1 className="movie movie_title">
-                {`${results.choices[0].message.content.movie.title}, ( ${results.choices[0].message.content.movie.year} )`}
+                {`${movie.title} ( ${movie.year} )`}
               </h1>
-              <p className="movie movie_synopsis">{results.choices[0].message.content.movie.synopsis}</p>
+              <p className="movie movie_synopsis">{movie.synopsis}</p>
             </div>
-          ))};
-          {/* {results.choices[0].message.content} */}
+          ))}
         </div>
         
       )}

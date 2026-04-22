@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface FormProps {
   onSubmit: (query: string) => Promise<void>;
@@ -12,7 +12,11 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
 
   const prompts = ["What's your favorite color?", "What's your mood?", "What's the weather?", "How old are you?", "Dream job?", "Favorite city?"];
 
-  let prompt = Math.floor(Math.random()*(prompts.length)) + 1;
+  const [ prompt, setPrompt ] = useState<number | null>(null);
+
+  useEffect(()=> {
+    setPrompt(Math.floor(Math.random()*(prompts.length)) + 1)
+  }, []);
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -22,7 +26,7 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
   return (
     <>
       <form className="form" onSubmit={handleSubmit}>
-        <label htmlFor="input">{prompts[prompt]}</label>
+        <label htmlFor="input">{prompt === null ? "Loading..." : prompts[prompt]}</label>
         <input 
           id="input"
           className="input border border-white rounded-sm" 
