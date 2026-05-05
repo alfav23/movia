@@ -10,12 +10,12 @@ interface FormProps {
 export default function Form({ onSubmit, isLoading = false }: FormProps) {
   const [query, setQuery] = useState<string>("");
 
-  const prompts = ["What's your favorite color?", "What's your mood?", "What's the weather?", "How old are you?", "Dream job?", "Favorite city?"];
+  const prompts = ["What's your favorite color?", "What's your mood?", "What's the weather?", "Birth year?", "Dream job?", "Favorite city?", "Zodiac sign?"];
 
   const [ prompt, setPrompt ] = useState<number | null>(null);
 
   useEffect(()=> {
-    setPrompt(Math.floor(Math.random()*(prompts.length)) + 1)
+    setPrompt(Math.floor(Math.random()*(prompts.length)))
   }, []);
 
   const handleSubmit = async (e: React.SubmitEvent) => {
@@ -24,12 +24,12 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
   };
 
   return (
-    <>
-      <form className="form" onSubmit={handleSubmit}>
-        <label htmlFor="input">{prompt === null ? "Loading..." : prompts[prompt]}</label>
+    <div className="form-container items-center justify-center">
+      <form className="m-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-3 form" onSubmit={handleSubmit}>
+        <label className="text-xl p-1 text-center form form-label" htmlFor="input">{prompt === null ? "Loading..." : prompts[prompt]}</label>
         <input 
           id="input"
-          className="input border border-white rounded-sm" 
+          className="form form-input border dark:border-white border-black rounded-sm" 
           type="text"
           pattern="\w+"
           placeholder="Enter only one word."
@@ -41,6 +41,6 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
           {isLoading ? "Searching..." : "Suggest Movies"}
         </Button>
       </form>
-    </>
+    </div>
   );
 }

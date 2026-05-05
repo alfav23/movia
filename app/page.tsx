@@ -7,6 +7,7 @@ import rehypeStringify from 'rehype-stringify';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import {unified} from 'unified';
+import Link from "next/link";
 
 export default function Page() {
   const [results, setResults] = useState<any>(null);
@@ -54,9 +55,13 @@ export default function Page() {
   };
 
   return (
-    <div>
-      <div>
-        <p>Hi, my name is Movia. What do you want to watch?</p>
+    <div className="page-content">
+      <div className="header">
+        <h1 className="text-4xl font-bold header text-center">
+          Hi, my name is Movia. 
+          <br></br>
+          What do you want to watch?
+        </h1>
       </div>
       <Form onSubmit={handleSearch} isLoading={isLoading} />
       
@@ -69,14 +74,16 @@ export default function Page() {
 
       {results && (
         //markdown library component around div, add movie poster results
-        <div className="p-4 rounded movies">
+        <div className="p-4 rounded justify-center movies">
           {console.log(results)}
          { results.map((movie: Movie) => (
             <div key={movie.id} className="movie">
-              <img src={movie.poster_path} alt={`poster for ${movie.title}`} />
-              <h1 className="movie movie_title">
-                {`${movie.title} ( ${movie.year} )`}
-              </h1>
+              <img src={movie.poster_path} alt={`poster for ${movie.title}`} width={200}/>
+              <Link href={`https://www.themoviedb.org/movie/${movie.id}`} target="_blank">
+                <h1 className="movie movie_title">
+                  {`${movie.title} ( ${movie.year} )`}
+                </h1>
+              </Link>
               <p className="movie movie_synopsis">{movie.synopsis}</p>
             </div>
           ))}
