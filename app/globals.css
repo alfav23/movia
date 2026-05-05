@@ -127,3 +127,9 @@
     @apply font-sans;
     }
 }
+
+@media screen and (max-width: 425px) {
+  .toggle {
+    display: none;
+  }
+}
