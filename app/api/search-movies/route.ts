@@ -4,8 +4,8 @@ export type Movie = {
   id: number
   poster_path: string
   title: string
-  year: string
-  synopsis: string
+  year: number
+  overview: string
 }
 
 type Message = {
@@ -30,12 +30,13 @@ async function searchTMDB(searchTerms: string[]): Promise<Movie[]> {
   }
   const data = await response.json();
   //check for results error
-  return data.results.map((movie: Movie) => ({
+  console.log("TMDB data:" + JSON.stringify(data));
+  return data.results.map((movie: any) => ({
     id: movie.id,
     poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
     title: movie.title,
-    year: movie.year,
-    synopsis: movie.synopsis
+    year: (new Date(movie.release_date)).getFullYear(),
+    overview: movie.overview
   }));
 }
 
@@ -112,15 +113,15 @@ export async function POST(request: NextRequest) {
                 "description": "Movie name"
               },
               "year": {
-                "type": "string",
+                "type": "number",
                 "description": "Movie release year"
               },
-              "synopsis": {
+              "overview": {
                 "type": "string",
                 "description": "A short summary of the movie"
               }
             },
-            "required": ["id", "poster_path", "title", "year", "synopsis"],
+            "required": ["id", "poster_path", "title", "year", "overview"],
             "additionalProperties": false
           }
         }
@@ -154,6 +155,7 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await response.json();
+    console.log("Model response 1:" + JSON.stringify(data));
 
     // Check if the model called any tools
     if (data.choices && data.choices[0].message.tool_calls) {
@@ -192,7 +194,9 @@ export async function POST(request: NextRequest) {
       });
 
       const followUpData = await followUpResponse.json();
-      console.log(followUpData.choices[0].message.content);
+
+
+      console.log("Model response 2 with tool call" + followUpData.choices[0].message.content);
       const movieContent = JSON.parse(followUpData.choices[0].message.content);
       return NextResponse.json({ results: [movieContent] });
     }

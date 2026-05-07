@@ -84,7 +84,7 @@ export default function Page() {
                   {`${movie.title} ( ${movie.year} )`}
                 </h1>
               </Link>
-              <p className="movie movie_synopsis">{movie.synopsis}</p>
+              <p className="movie movie_synopsis">{movie.overview}</p>
             </div>
           ))}
         </div>
