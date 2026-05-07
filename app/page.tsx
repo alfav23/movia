@@ -57,7 +57,7 @@ export default function Page() {
   return (
     <div className="page-content">
       <div className="header">
-        <h1 className="text-4xl font-bold header text-center">
+        <h1 className="mt-10 text-4xl font-bold header text-center">
           Hi, my name is Movia. 
           <br></br>
           What do you want to watch?
@@ -74,17 +74,24 @@ export default function Page() {
 
       {results && (
         //markdown library component around div, add movie poster results
-        <div className="p-4 rounded justify-center movies">
+        <div className="p-4 rounded flex-wrap results">
           {console.log(results)}
          { results.map((movie: Movie) => (
-            <div key={movie.id} className="movie">
-              <img src={movie.poster_path} alt={`poster for ${movie.title}`} width={200}/>
+            <div key={movie.id} className="movie-card movie text-center border-2 m-5 p-10 gap-x-4 max-w-300">
+              <Link className='flex justify-center' href={`https://www.themoviedb.org/movie/${movie.id}`} target="_blank">
+                <img src={movie.poster_path} alt={`poster for ${movie.title}`} width={200} className="movie-card movie-poster flex justify-center"/>
+              </Link>
               <Link href={`https://www.themoviedb.org/movie/${movie.id}`} target="_blank">
-                <h1 className="movie movie_title">
-                  {`${movie.title} ( ${movie.year} )`}
+                <h1 className="movie-card movie-title">
+                  {`${movie.title}`}
                 </h1>
               </Link>
-              <p className="movie movie_synopsis">{movie.overview}</p>
+              <h1 className="movie-card movie-year">
+                {`( ${movie.year} )`}
+              </h1>
+              <p className="movie-card movie-synopsis">
+                {movie.overview}
+              </p>
             </div>
           ))}
         </div>

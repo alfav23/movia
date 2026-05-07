@@ -128,6 +128,12 @@
     }
 }
 
+.results, .movie-card, .movie {
+  max-width: 100vw;
+}
+
+
+
 @media screen and (max-width: 425px) {
   .toggle {
     display: none;
