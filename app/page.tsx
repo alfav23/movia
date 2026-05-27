@@ -8,6 +8,7 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import {unified} from 'unified';
 import Link from "next/link";
+import { Card } from "@/components/ui/card";
 
 export default function Page() {
   const [results, setResults] = useState<any>(null);
@@ -56,15 +57,16 @@ export default function Page() {
 
   return (
     <div className="page-content">
-      <div className="header">
-        <h1 className="mt-10 text-4xl font-bold header text-center">
-          Hi, my name is Movia. 
-          <br></br>
-          What do you want to watch?
-        </h1>
-      </div>
-      <Form onSubmit={handleSearch} isLoading={isLoading} />
-      
+      <Card className="flex justify-center items-center min-w-svw min-h-svh">
+        <div className="header">
+          <h1 className="mt-10 text-2xl font-bold header text-center">
+            Hi, my name is Movia. 
+            <br></br>
+            What do you want to watch?
+          </h1>
+        </div>
+        <Form onSubmit={handleSearch} isLoading={isLoading} />
+      </Card>
       {error && (
         <div className="text-red-500 mt-4">
           Error: {error}

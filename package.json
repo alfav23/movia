@@ -17,6 +17,7 @@
     "@openrouter/sdk": "^0.11.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "motion": "^12.40.0",
     "next": "16.1.7",
     "next-themes": "^0.4.6",
     "promptlayer": "^1.2.2",
