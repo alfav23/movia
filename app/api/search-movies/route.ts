@@ -142,9 +142,6 @@ export async function POST(request: NextRequest) {
         { id: 'response-healing' }
       ],
       tools,
-      provider: {
-        require_parameters: true,
-      },
       stream: false,
     };
 
@@ -154,10 +151,26 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+    if (!response.ok) {
+      console.error("OpenRouter request failed:", response.status, responseText);
+      return NextResponse.json(
+        { error: 'OpenRouter request failed', details: responseText },
+        { status: response.status }
+      );
+    }
+
+    const data = JSON.parse(responseText);
     console.log("Model response 1:" + JSON.stringify(data));
 
-    // Check if the model called any tools
+    if (data.error) {
+      console.error("OpenRouter response error:", JSON.stringify(data.error));
+      return NextResponse.json(
+        { error: 'OpenRouter response error', details: data.error },
+        { status: 500 }
+      );
+    }
+
     if (data.choices && data.choices[0].message.tool_calls) {
       // Add the assistant's message with tool calls to messages
       messages.push(data.choices[0].message);
@@ -181,9 +194,6 @@ export async function POST(request: NextRequest) {
         model: "nvidia/nemotron-3-super-120b-a12b:free@preset/movie-suggester",
         messages,
         response_format: responseFormat,
-        provider: {
-          require_parameters: true,
-        },
         stream: false,
       };
 
@@ -193,17 +203,32 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(followUpPayload)
       });
 
-      const followUpData = await followUpResponse.json();
+      const followUpText = await followUpResponse.text();
+      if (!followUpResponse.ok) {
+        console.error("OpenRouter follow-up request failed:", followUpResponse.status, followUpText);
+        return NextResponse.json(
+          { error: 'OpenRouter follow-up request failed', details: followUpText },
+          { status: followUpResponse.status }
+        );
+      }
 
+      const followUpData = JSON.parse(followUpText);
+      if (followUpData.error) {
+        console.error("OpenRouter follow-up response error:", JSON.stringify(followUpData.error));
+        return NextResponse.json(
+          { error: 'OpenRouter follow-up response error', details: followUpData.error },
+          { status: 500 }
+        );
+      }
 
       console.log("Model response 2 with tool call" + followUpData.choices[0].message.content);
       const movieContent = JSON.parse(followUpData.choices[0].message.content);
-      return NextResponse.json({ results: [movieContent] });
+      return NextResponse.json({ results: movieContent });
     }
 
     // If no tools were called, return the initial response
     const movieContent = JSON.parse(data.choices[0].message.content);
-    return NextResponse.json({ results: [movieContent] });
+    return NextResponse.json({ results: movieContent });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(

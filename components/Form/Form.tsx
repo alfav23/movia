@@ -38,7 +38,7 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
 
   return (
     <div className="form-container items-center justify-center">
-      <form className="m-10 flex flex-col gap-x-6 gap-y-8 form" onSubmit={handleSubmit}>
+      <form className="m-5 flex flex-col gap-x-6 gap-y-8 form" onSubmit={handleSubmit}>
         <div className="input-container flex gap-x-4 justify-center">
           <label className="text-xl p-1 text-center form form-label" htmlFor="input">{prompt === null ? "Loading..." : prompts[prompt]}</label>
           <input 
@@ -52,7 +52,7 @@ export default function Form({ onSubmit, isLoading = false }: FormProps) {
             disabled={isLoading}
           />
         </div>
-        <div className="button-container justify-center flex">
+        <div className="mt-5 button-container justify-center flex">
           <Button type="submit" disabled={isLoading}>
             {isLoading ? `${quotes[quote]}...` : "Suggest Movies"}
           </Button>
